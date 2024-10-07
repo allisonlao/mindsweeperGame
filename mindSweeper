@@ -1,0 +1,254 @@
+import java.util.Scanner;
+import java.util.Random;
+public class Minesweeper {
+    static int height;
+    static int width;
+    static int totalNumMines;
+    static int totalMineless;
+    static int totalUncovered;
+    static Space[][] board;
+    
+public static void main(String[] args) 
+{
+    Scanner user = new Scanner(System.in);
+    System.out.println("What level of difficulty (easy=1, medium=2, hard=3)? ");
+    int level = user.nextInt();
+    switch (level)
+    {
+    case 1:
+        height = 9;
+        width = 9;
+        totalNumMines = 10;
+        break;
+    case 2:
+        height = 16;
+        width = 16;
+        totalNumMines = 40;
+        break;
+    case 3:
+        height = 16;
+        width = 30;
+        totalNumMines = 99;
+        break;
+
+    }
+    board = new Space[height][width];
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            board[i][j] = new Space();
+        }
+    }
+
+    totalMineless = (height*width)-totalNumMines;
+    totalUncovered = 0;
+
+    //remember every time you uncover you add 1
+    printBoard();
+    System.out.println("Enter row number: ");
+    int firstClickRow = user.nextInt();
+    System.out.println("Enter column number: ");
+    int firstClickCol = user.nextInt();
+
+
+    
+    placeMines(firstClickRow, firstClickCol);
+
+    uncoverSpace(firstClickRow,firstClickCol);
+    
+    //uncoverAll();
+    //printBoard();
+
+    while (totalUncovered<totalMineless)
+    {
+        //first, print board, should all be covered
+        printBoard();
+        System.out.println("Enter row number: ");
+        int clickRow = user.nextInt();
+        System.out.println("Enter column number: ");
+        int clickCol = user.nextInt();
+
+
+        //running after the first input
+        System.out.println("Would you like to uncover or flag/unflag this space? (Uncover=0, Flag/Unflag=1): ");
+        int userInput = user.nextInt();
+
+        //user wants to uncover a space
+        if (userInput == 0)
+        {
+            if (board[clickRow][clickCol].getFlag())
+            {
+                System.out.println("Unflag it before uncovering. ");
+                continue;
+            }
+
+            //lose case, picked a mine
+            if (board[clickRow][clickCol].getHasMine())
+            {
+                board[clickRow][clickCol].setCover(false);
+                totalUncovered++;
+
+                uncoverAll();
+                printBoard();
+                System.out.println("You are a big fat loser");
+                return;
+            }
+            else 
+            {
+                uncoverSpace(clickRow, clickCol);
+            }
+            //if the spaces around it all have no mines, then uncover those to
+            //
+
+        }
+        else if (userInput == 1)
+        {
+            //sets the space as opposite of flag/unflag based on what it already is
+            board[clickRow][clickCol].setFlag(!board[clickRow][clickCol].getFlag());
+        }
+        else 
+        {
+            System.out.println("Error");
+            continue;
+        }
+    }
+
+    System.out.println("You win");
+    printBoard();
+}
+
+public static void printBoard() {
+        System.out.print(Color.CLEAR);
+        System.out.print("    ");
+        for (int i = 0; i < width ; i++) {
+            if (i >= 10) {
+                System.out.print(" " + i);
+            }
+            else {
+                System.out.print(" " + i + " ");
+            }
+        }
+        System.out.println();
+        for (int i = 0; i < height; i++) {
+            if (i >= 10) {
+                System.out.print((i) + "  ");
+            }
+            else {
+                System.out.print(" " + (i) + "  ");
+            }
+            for (int j = 0; j < width; j++) {
+                board[i][j].toString();
+            }
+            System.out.println();
+        }
+        System.out.println();
+        System.out.println();
+    }
+
+
+public static void uncoverSpace(int row, int col)
+{
+    //if it is already uncovered, we are done
+    if (board[row][col].getCover() == false) 
+    {
+        return;
+    }
+
+    //uncover it
+    board[row][col].setCover(false);
+    totalUncovered++;
+
+    if (board[row][col].getMinesAdjacent() == 0)
+    {
+        for(int i = -1; i <=1; i++)
+        {
+            for (int j = 1; j >=-1; j--)
+            {
+                if (i==0 && j==0) 
+                {
+                    continue;
+                }
+
+                if( (row+i) < 0 || (col+j) < 0 || (row+i) >= height || (col+j) >= width )
+                {
+                    continue;
+                }
+
+                if( !board[row+i][col+j].getCover() )
+                {
+                    continue;
+                }
+
+                assert board[row+i][col+j].getHasMine() == false : " adjacent mine count is 0 but it has mine";
+                if(board[row+i][col+j].getMinesAdjacent() == 0)
+                {
+                    // board[row][col].setCover(false);
+                    uncoverSpace(row+i,col+j);
+                }
+                else
+                {
+                    board[row+i][col+j].setCover(false);
+                    totalUncovered++;                    
+                }
+            }
+        }
+    }        
+}
+
+public static void uncoverAll()
+{
+    for (int i = 0; i < height; i++) 
+    {
+            for (int j = 0; j < width; j++) 
+            {
+                board[i][j].setCover(false);
+            }
+    }
+
+
+}
+
+public static void placeMines(int firstClickRow, int firstClickCol)
+{
+      Random num = new Random();
+      int n = 0;
+      //placing mines
+        while (n<totalNumMines)
+        {   
+            int row = num.nextInt(height);
+            int col = num.nextInt(width);
+
+            if(row==firstClickRow && col==firstClickCol)
+            {
+                continue;
+            }
+
+            if(!board[row][col].getHasMine())
+            {
+                //set that space has mine
+                board[row][col].setHasMine(true);
+                n++;
+
+                //its checking for when i=-1!!!
+                for (int i = -1; i <=1; i++)
+                {
+                for (int j = 1; j >=-1; j--)
+                {
+                    if(i==0 && j==0)
+                    {
+                        continue;
+                    }
+
+                    if ( (row+i)>=0 && (col+j)>=0 && (row+i)<height && (col+j)<width && !board[row + i][col + j].getHasMine())
+                    {
+                        board[row+i][col+j].addMinesAdjacent(1);
+                    }
+                }
+                }
+            }
+        }
+        printBoard();
+}
+
+}
