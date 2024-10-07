@@ -1,0 +1,80 @@
+public class Space {
+    private boolean flag;
+    private boolean cover;
+    private int minesAdjacent;
+    private boolean hasMine;
+    
+
+  public Space()
+  {
+    flag = false;
+    cover = true;
+    minesAdjacent = 0;
+    hasMine = false;
+  }
+  public boolean getCover()
+  {
+    return cover;
+  }
+  public void setCover(boolean newCover)
+  {
+    cover=newCover;
+  }
+
+public boolean getHasMine()
+  {
+        return hasMine;
+  }
+public void setHasMine(boolean mine)
+  {
+        hasMine = mine;
+  }
+  public boolean getFlag()
+  {
+        return flag;
+  }
+public void setFlag(boolean newFlag)
+  {
+        flag = newFlag;
+  }
+
+public int getMinesAdjacent()
+  {
+        return minesAdjacent;
+  }
+public void addMinesAdjacent(int add)
+  {
+        minesAdjacent += add;
+  }
+
+
+public String toString()
+  {
+    //return whats in the space: flag, cover, uncover, 
+    if (flag == true)
+    {
+        System.out.print(Color.CYAN + " > " + Color.RESET);
+    }
+    else if (cover == true)
+    {
+        System.out.print(" . " + Color.RESET);
+    }
+    else if (cover == false)
+    {
+        if (hasMine == true)
+        {
+             System.out.print(Color.RED +  " * " + Color.RESET);
+        }
+        else if (minesAdjacent == 0)
+       {
+        System.out.print("   ");
+       }
+        else
+         {
+          System.out.print(" " + Color.NUM[minesAdjacent] + minesAdjacent + " "+ Color.RESET);
+         }
+    }
+    return "";
+  } 
+
+}
